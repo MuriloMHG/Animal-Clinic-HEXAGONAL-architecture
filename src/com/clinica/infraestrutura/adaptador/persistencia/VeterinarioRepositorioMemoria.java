@@ -2,7 +2,6 @@ package com.clinica.infraestrutura.adaptador.persistencia;
 
 import com.clinica.dominio.modelo.Veterinario;
 import com.clinica.dominio.porta.saida.PortaVeterinarioRepositorio;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
