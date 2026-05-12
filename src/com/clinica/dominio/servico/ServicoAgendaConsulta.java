@@ -36,44 +36,68 @@ public class ServicoAgendaConsulta implements PortaAgendaConsulta {
 
     @Override
     public Consulta agendarConsulta(Long animalId, Long veterinarioId, LocalDate data, LocalTime hora, TipoConsulta tipo) {
-        // TODO: buscar animal pelo ID. Se não existir, lançar AnimalNaoEncontradoException.
-        // TODO: buscar veterinário pelo ID. Se não existir ou estiver ocupado, lançar VeterinarioIndisponivelException.
-        // TODO: ocupar veterinário.
-        // TODO: criar Consulta com situação AGENDADA.
-        // TODO: salvar consulta no consultaRepo.
-        // TODO: notificar tutor.
-        // TODO: retornar consulta criada.
-        return null;
+        Animal animal = animalRepo.buscarPorId(animalId)
+            .orElseThrow(() -> new AnimalNaoEncontradoException("Animal não encontrado com ID: " + animalId));
+
+        Veterinario veterinario = vetRepo.buscarPorId(veterinarioId)
+            .orElseThrow(() -> new VeterinarioIndisponivelException("Veterinario não encontrado com ID: " + veterinarioId));
+
+        if (!veterinario.estaDisponivel()) {
+            throw new VeterinarioIndisponivelException("Veterinario indisponivel: " + veterinario.getNome());
+        }
+
+        veterinario.ocupar();
+        vetRepo.salvar(veterinario);
+
+        Consulta consulta = new Consulta(null, animal, veterinario, data, hora, tipo, SituacaoConsulta.AGENDADA, null);
+        consultaRepo.salvar(consulta);
+        notificacao.notificarAgendamento(animal.getTutor(), animal, consulta);
+
+        return consulta;
     }
 
     @Override
     public Consulta realizarConsulta(Long consultaId, String observacoes) {
-        // TODO: buscar consulta. Se não existir, lançar RuntimeException.
-        // TODO: chamar consulta.realizar(observacoes).
-        // TODO: liberar veterinário associado.
-        // TODO: salvar alterações.
-        // TODO: retornar consulta atualizada.
-        return null;
+        Consulta consulta = consultaRepo.buscarPorId(consultaId)
+            .orElseThrow(() -> new RuntimeException("Consulta nao encontrada com ID: " + consultaId));
+
+        consulta.realizar(observacoes);
+
+        Veterinario veterinario = consulta.getVeterinario();
+        if (veterinario != null) {
+            veterinario.liberar();
+            vetRepo.salvar(veterinario);
+        }
+
+        consultaRepo.salvar(consulta);
+        return consulta;
     }
 
     @Override
     public void cancelarConsulta(Long consultaId) {
-        // TODO: buscar consulta. Se não existir, lançar RuntimeException.
-        // TODO: chamar consulta.cancelar().
-        // TODO: liberar veterinário associado.
-        // TODO: notificar tutor sobre cancelamento.
-        // TODO: salvar alterações.
+        Consulta consulta = consultaRepo.buscarPorId(consultaId)
+            .orElseThrow(() -> new RuntimeException("Consulta nao encontrada com ID: " + consultaId));
+
+        consulta.cancelar();
+
+        Veterinario veterinario = consulta.getVeterinario();
+        if (veterinario != null) {
+            veterinario.liberar();
+            vetRepo.salvar(veterinario);
+        }
+
+        Animal animal = consulta.getAnimal();
+        notificacao.notificarCancelamento(animal.getTutor(), animal, "Consulta cancelada pelo sistema.");
+        consultaRepo.salvar(consulta);
     }
 
     @Override
     public List<Consulta> obterHistoricoAnimal(Long animalId) {
-        // TODO: delegar para consultaRepo.buscarPorAnimal(animalId).
-        return null;
+        return consultaRepo.buscarPorAnimal(animalId);
     }
 
     @Override
     public List<Consulta> obterAgendaVeterinario(Long vetId) {
-        // TODO: delegar para consultaRepo.buscarPorVeterinario(vetId).
-        return null;
+        return consultaRepo.buscarPorVeterinario(vetId);
     }
 }
