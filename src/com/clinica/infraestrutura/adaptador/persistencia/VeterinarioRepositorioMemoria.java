@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class VeterinarioRepositorioMemoria implements PortaVeterinarioRepositorio {
     private final Map<Long, Veterinario> store = new HashMap<>();
@@ -14,25 +15,28 @@ public class VeterinarioRepositorioMemoria implements PortaVeterinarioRepositori
 
     @Override
     public void salvar(Veterinario vet) {
-        // TODO: se vet.getId() for null, atribuir ID automático.
-        // TODO: salvar no HashMap.
+        if (vet.getId() == null) {
+            vet.setId(proximoId++);
+        }
+        store.put(vet.getId(), vet);
     }
 
     @Override
     public Optional<Veterinario> buscarPorId(Long id) {
-        // TODO: retornar veterinário pelo id.
-        return Optional.empty();
+        return Optional.ofNullable(store.get(id));
     }
 
     @Override
     public List<Veterinario> buscarDisponiveis() {
-        // TODO: retornar apenas veterinários disponíveis.
-        return new ArrayList<>();
+        return store.values().stream()
+            .filter(Veterinario::estaDisponivel)
+            .collect(Collectors.toList());
     }
 
     @Override
     public List<Veterinario> buscarPorEspecialidade(String especialidade) {
-        // TODO: filtrar por especialidade ignorando maiúsculas/minúsculas.
-        return new ArrayList<>();
+        return store.values().stream()
+            .filter(v -> v.getEspecialidade().equalsIgnoreCase(especialidade))
+            .collect(Collectors.toList());
     }
 }

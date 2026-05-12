@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class AnimalRepositorioMemoria implements PortaAnimalRepositorio {
     private final Map<Long, Animal> store = new HashMap<>();
@@ -14,30 +15,31 @@ public class AnimalRepositorioMemoria implements PortaAnimalRepositorio {
 
     @Override
     public void salvar(Animal animal) {
-        // TODO: se animal.getId() for null, atribuir ID automático.
-        // TODO: salvar no HashMap usando o id como chave.
+        if (animal.getId() == null) {
+            animal.setId(proximoId++);
+        }
+        store.put(animal.getId(), animal);
     }
 
     @Override
     public Optional<Animal> buscarPorId(Long id) {
-        // TODO: retornar Optional.ofNullable(store.get(id)).
-        return Optional.empty();
+        return Optional.ofNullable(store.get(id));
     }
 
     @Override
     public List<Animal> listarPorTutor(String tutor) {
-        // TODO: filtrar animais pelo nome do tutor, ignorando maiúsculas/minúsculas.
-        return new ArrayList<>();
+        return store.values().stream()
+            .filter(a -> a.getTutor().equalsIgnoreCase(tutor))
+            .collect(Collectors.toList());
     }
 
     @Override
     public List<Animal> listarTodos() {
-        // TODO: retornar todos os animais.
-        return new ArrayList<>();
+        return new ArrayList<>(store.values());
     }
 
     @Override
     public void remover(Long id) {
-        // TODO: remover animal pelo id.
+        store.remove(id);
     }
 }

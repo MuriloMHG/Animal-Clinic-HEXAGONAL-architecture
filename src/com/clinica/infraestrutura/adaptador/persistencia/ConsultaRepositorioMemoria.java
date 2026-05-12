@@ -3,11 +3,11 @@ package com.clinica.infraestrutura.adaptador.persistencia;
 import com.clinica.dominio.modelo.Consulta;
 import com.clinica.dominio.modelo.SituacaoConsulta;
 import com.clinica.dominio.porta.saida.PortaConsultaRepositorio;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class ConsultaRepositorioMemoria implements PortaConsultaRepositorio {
     private final Map<Long, Consulta> store = new HashMap<>();
@@ -15,31 +15,35 @@ public class ConsultaRepositorioMemoria implements PortaConsultaRepositorio {
 
     @Override
     public void salvar(Consulta consulta) {
-        // TODO: se consulta.getId() for null, atribuir ID automático.
-        // TODO: salvar no HashMap.
+        if (consulta.getId() == null) {
+            consulta.setId(proximoId++);
+        }
+        store.put(consulta.getId(), consulta);
     }
 
     @Override
     public Optional<Consulta> buscarPorId(Long id) {
-        // TODO: retornar consulta pelo id.
-        return Optional.empty();
+        return Optional.ofNullable(store.get(id));
     }
 
     @Override
     public List<Consulta> buscarPorAnimal(Long animalId) {
-        // TODO: filtrar pelo id do animal associado à consulta.
-        return new ArrayList<>();
+        return store.values().stream()
+            .filter(c -> c.getAnimal().getId().equals(animalId))
+            .collect(Collectors.toList());
     }
 
     @Override
     public List<Consulta> buscarPorVeterinario(Long vetId) {
-        // TODO: filtrar pelo id do veterinário associado à consulta.
-        return new ArrayList<>();
+        return store.values().stream()
+            .filter(c -> c.getVeterinario().getId().equals(vetId))
+            .collect(Collectors.toList());
     }
 
     @Override
     public List<Consulta> listarAgendadas() {
-        // TODO: retornar consultas cuja situação seja AGENDADA.
-        return new ArrayList<>();
+        return store.values().stream()
+            .filter(c -> c.getSituacao() == SituacaoConsulta.AGENDADA)
+            .collect(Collectors.toList());
     }
 }
