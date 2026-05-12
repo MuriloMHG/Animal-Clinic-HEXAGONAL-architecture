@@ -1,5 +1,10 @@
 package com.clinica.infraestrutura.adaptador.notificacao;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.time.LocalDateTime;
+
 import com.clinica.dominio.modelo.Animal;
 import com.clinica.dominio.modelo.Consulta;
 import com.clinica.dominio.porta.saida.PortaNotificacaoTutor;
@@ -9,18 +14,34 @@ public class NotificacaoCsv implements PortaNotificacaoTutor {
 
     public NotificacaoCsv(String caminhoArquivo) {
         this.caminhoArquivo = caminhoArquivo;
-        // TODO: criar cabeçalho do CSV se o arquivo ainda não existir.
+        criarCabecalhoSeNecessario();
     }
 
     @Override
     public void notificarAgendamento(String tutor, Animal animal, Consulta consulta) {
-        // TODO: adicionar uma linha CSV com o evento AGENDAMENTO.
+        String linha = LocalDateTime.now() + ",AGENDAMENTO," + tutor + "," + animal.getNome() + "," +
+            consulta.getVeterinario().getNome() + "," + consulta.getData() + "T" + consulta.getHora();
+        escreverLinha(linha);
     }
 
     @Override
     public void notificarCancelamento(String tutor, Animal animal, String motivo) {
-        // TODO: adicionar uma linha CSV com o evento CANCELAMENTO.
+        String linha = LocalDateTime.now() + ",CANCELAMENTO," + tutor + "," + animal.getNome() + ",N/A,N/A";
+        escreverLinha(linha);
     }
 
-    // TODO: criar método privado para escrever linha no arquivo usando FileWriter em modo append.
+    private void criarCabecalhoSeNecessario() {
+        File arquivo = new File(caminhoArquivo);
+        if (!arquivo.exists() || arquivo.length() == 0) {
+            escreverLinha("timestamp,tipo_evento,tutor,animal,veterinario,data_consulta");
+        }
+    }
+
+    private void escreverLinha(String linha) {
+        try (FileWriter writer = new FileWriter(caminhoArquivo, true)) {
+            writer.write(linha + System.lineSeparator());
+        } catch (IOException e) {
+            throw new RuntimeException("Erro ao escrever notificação CSV: " + e.getMessage(), e);
+        }
+    }
 }
