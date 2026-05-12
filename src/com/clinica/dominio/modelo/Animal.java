@@ -1,6 +1,8 @@
 package com.clinica.dominio.modelo;
 
+import java.time.DateTimeException;
 import java.time.LocalDate;
+import java.time.Period;
 
 public class Animal {
     private Long id;
@@ -11,7 +13,9 @@ public class Animal {
     private final String tutor;
 
     public Animal(Long id, String nome, String especie, String raca, LocalDate dataNascimento, String tutor) {
-        // TODO: validar nome, especie e tutor: não podem ser nulos nem vazios.
+        validarTexto(raca, "raca");
+        validarTexto(nome, "nome");
+        validarTexto(tutor, "tutor");
         this.id = id;
         this.nome = nome;
         this.especie = especie;
@@ -21,8 +25,24 @@ public class Animal {
     }
 
     public int calcularIdadeEmAnos() {
-        // TODO: calcular idade usando dataNascimento e LocalDate.now().
-        return 0;
+        if (dataNascimento == null)
+        {
+            throw new IllegalArgumentException("Data de nascimento não pode ser nula !");
+        }
+        try{
+            LocalDate today = LocalDate.now();
+
+            return Period.between(dataNascimento, today).getYears();
+        } catch(DateTimeException e){
+            throw new DateTimeException("Erro ao calcular idade: " + e.getMessage());
+        }
+    }
+
+    private void validarTexto(String valor, String campo)
+    {
+        if(valor == null || valor.trim().isEmpty()){
+            throw new IllegalArgumentException("O campo " + campo + " é obrigatório !");
+        }
     }
 
     public Long getId() { return id; }

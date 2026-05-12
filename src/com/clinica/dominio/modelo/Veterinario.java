@@ -10,7 +10,16 @@ public class Veterinario {
     private SituacaoVeterinario situacao;
 
     public Veterinario(Long id, String nome, String crmv, String especialidade, SituacaoVeterinario situacao) {
-        // TODO: opcionalmente validar campos obrigatórios.
+        if (nome == null){
+            throw new IllegalArgumentException("Nome é obrigatório !");
+        }
+        if (crmv == null){
+            throw new IllegalArgumentException("CRMV é obrigatório !");
+        }
+        if (especialidade == null){
+            throw new IllegalArgumentException("Especialidade é obrigatório !");
+        }
+        
         this.id = id;
         this.nome = nome;
         this.crmv = crmv;
@@ -19,17 +28,19 @@ public class Veterinario {
     }
 
     public boolean estaDisponivel() {
-        // TODO: retornar true quando situacao == SituacaoVeterinario.DISPONIVEL.
-        return false;
+        return this.situacao == SituacaoVeterinario.DISPONIVEL;
     }
 
     public void ocupar() {
-        // TODO: se estiver DISPONIVEL, mudar para OCUPADO.
-        // TODO: se já estiver OCUPADO, lançar VeterinarioIndisponivelException.
+        if(!estaDisponivel())
+        {
+            throw new VeterinarioIndisponivelException("Esse veterinario nao esta disponivel no momento !");
+        }
+        this.situacao = SituacaoVeterinario.OCUPADO;
     }
 
     public void liberar() {
-        // TODO: mudar situacao para DISPONIVEL.
+        this.situacao = SituacaoVeterinario.DISPONIVEL;
     }
 
     public Long getId() { return id; }

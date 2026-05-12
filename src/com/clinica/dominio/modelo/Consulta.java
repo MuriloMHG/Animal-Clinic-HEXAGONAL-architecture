@@ -14,8 +14,25 @@ public class Consulta {
     private String observacoes;
 
     public Consulta(Long id, Animal animal, Veterinario veterinario, LocalDate data, LocalTime hora,
-                    TipoConsulta tipo, SituacaoConsulta situacao, String observacoes) {
-        // TODO: opcionalmente validar animal, veterinario, data, hora e tipo.
+                    TipoConsulta tipo, SituacaoConsulta situacao, String observacoes)
+    {
+
+        if (animal == null) {
+            throw new IllegalArgumentException("Animal é obrigatório.");
+        }
+        if (veterinario == null) {
+            throw new IllegalArgumentException("Veterinário é obrigatório.");
+        }
+        if (data == null) {
+            throw new IllegalArgumentException("Data é obrigatória.");
+        }
+        if (hora == null) {
+            throw new IllegalArgumentException("Hora é obrigatória.");
+        }
+        if (tipo == null) {
+            throw new IllegalArgumentException("Tipo da consulta é obrigatório.");
+        }
+
         this.id = id;
         this.animal = animal;
         this.veterinario = veterinario;
@@ -27,15 +44,22 @@ public class Consulta {
     }
 
     public void realizar(String observacoes) {
-        // TODO: permitir apenas se situacao == AGENDADA.
-        // TODO: mudar situacao para REALIZADA e gravar observacoes.
-        // TODO: em transição inválida, lançar IllegalStateException com mensagem descritiva.
+        if (this.situacao != SituacaoConsulta.AGENDADA) {
+            throw new IllegalStateException(
+                "Apenas consultas AGENDADAS podem ser realizadas. Situação atual: " + this.situacao
+            );
+        }
+        this.situacao = SituacaoConsulta.REALIZADA;
+        this.observacoes = observacoes;
     }
 
     public void cancelar() {
-        // TODO: permitir cancelamento se situacao == AGENDADA ou REALIZADA.
-        // TODO: mudar situacao para CANCELADA.
-        // TODO: em transição inválida, lançar IllegalStateException com mensagem descritiva.
+        if (this.situacao != SituacaoConsulta.AGENDADA && this.situacao != SituacaoConsulta.REALIZADA) {
+            throw new IllegalStateException(
+                "Apenas consultas AGENDADAS ou REALIZADAS podem ser canceladas. Situação atual: " + this.situacao
+            );
+        }
+        this.situacao = SituacaoConsulta.CANCELADA;
     }
 
     public Long getId() { return id; }
