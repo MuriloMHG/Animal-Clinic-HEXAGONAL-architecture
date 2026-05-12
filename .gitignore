@@ -1,0 +1,4 @@
+out/
+*.class
+notificacoes.csv
+sources.txt
